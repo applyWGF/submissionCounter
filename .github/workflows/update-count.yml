@@ -13,11 +13,11 @@ jobs:
   update-count:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Fetch count from Submittable
         env:
@@ -38,5 +38,7 @@ jobs:
           fi
 
       - name: Purge jsDelivr cache
+        continue-on-error: true
         run: |
-          curl -sf -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/public/count.json"
+          curl -sS -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/public/count.json" \
+            || echo "jsDelivr purge unavailable — count.json was still updated in the repo"
