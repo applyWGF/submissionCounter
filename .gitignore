@@ -1,0 +1,16 @@
+.env
+.env.local
+.env.*.local
+node_modules/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local API reference and scripts with credentials
+api/swagger_06-15-2026.json
+api/list-projects.js

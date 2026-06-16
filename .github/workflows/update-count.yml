@@ -1,0 +1,42 @@
+name: Update submission count
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch count from Submittable
+        env:
+          SUBMITTABLE_API_KEY: ${{ secrets.SUBMITTABLE_API_KEY }}
+          SUBMITTABLE_PROJECT_ID: ${{ secrets.SUBMITTABLE_PROJECT_ID }}
+        run: node scripts/update-count.js
+
+      - name: Commit and push count.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/count.json
+          if git diff --staged --quiet; then
+            echo "No change to count.json"
+          else
+            git commit -m "chore: update submission count"
+            git push
+          fi
+
+      - name: Purge jsDelivr cache
+        run: |
+          curl -sf -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/public/count.json"
