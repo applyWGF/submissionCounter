@@ -1,14 +1,16 @@
 <!--
   Paste this into a Squarespace Code Block on your application page.
 
-  Replace GITHUB_OWNER and GITHUB_REPO with your repository path.
-  Example: https://cdn.jsdelivr.net/gh/wgfoundation/WGF@main/public/count.json
-
-  The count is updated every 15 minutes by GitHub Actions — no API keys on this page.
+  Count URL: https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count.json
+  Updated every 15 minutes by GitHub Actions — no API keys on this page.
 -->
 <div id="entry-count-widget">
-  <p class="entry-count-label">Applications submitted</p>
-  <p class="entry-count-number" aria-live="polite">—</p>
+  <p class="entry-count-line" aria-live="polite">
+    Applications submitted: <span class="entry-count-number">—</span>
+  </p>
+  <p class="entry-count-updated">
+    Last updated: <span class="entry-count-time">—</span>
+  </p>
 </div>
 
 <style>
@@ -16,25 +18,39 @@
     text-align: center;
     padding: 1.5rem;
   }
-  .entry-count-label {
-    font-size: 1rem;
-    margin: 0 0 0.5rem;
-    opacity: 0.85;
-  }
-  .entry-count-number {
-    font-size: 2.5rem;
+  .entry-count-line {
+    font-size: 1.25rem;
     font-weight: 700;
+    margin: 0 0 0.5rem;
+  }
+  .entry-count-updated {
+    font-size: 0.95rem;
     margin: 0;
-    line-height: 1.2;
+    opacity: 0.85;
   }
 </style>
 
 <script>
 (function () {
-  var COUNT_URL = 'https://cdn.jsdelivr.net/gh/GITHUB_OWNER/GITHUB_REPO@main/public/count.json';
+  var COUNT_URL = 'https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count.json';
   var numberEl = document.querySelector('#entry-count-widget .entry-count-number');
+  var timeEl = document.querySelector('#entry-count-widget .entry-count-time');
 
-  if (!numberEl) return;
+  if (!numberEl || !timeEl) return;
+
+  function formatUpdatedAt(isoString) {
+    var date = new Date(isoString);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+  }
 
   fetch(COUNT_URL)
     .then(function (res) {
@@ -44,10 +60,11 @@
     .then(function (data) {
       if (typeof data.count !== 'number') throw new Error('Invalid response');
       numberEl.textContent = data.count.toLocaleString();
+      timeEl.textContent = data.updatedAt ? formatUpdatedAt(data.updatedAt) : '—';
     })
     .catch(function () {
       numberEl.textContent = '—';
-      numberEl.setAttribute('aria-label', 'Count temporarily unavailable');
+      timeEl.textContent = '—';
     });
 })();
 </script>
