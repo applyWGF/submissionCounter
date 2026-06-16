@@ -9,11 +9,16 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   update-count:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: main
 
       - uses: actions/setup-node@v5
         with:
@@ -26,16 +31,19 @@ jobs:
         run: node scripts/update-count.js
 
       - name: Commit and push count.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add public/count.json
           if git diff --staged --quiet; then
             echo "No change to count.json"
-          else
-            git commit -m "chore: update submission count"
-            git push
+            exit 0
           fi
+          git commit -m "chore: update submission count"
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
 
       - name: Purge jsDelivr cache
         continue-on-error: true
