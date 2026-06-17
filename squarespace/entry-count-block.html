@@ -6,7 +6,7 @@
 -->
 <div id="entry-count-widget">
   <p class="entry-count-line" aria-live="polite">
-    Applications submitted: <span class="entry-count-number">—</span>
+    Applications submitted: <span class="entry-count-number">—</span> / <span class="entry-count-limit">2000</span>
   </p>
   <p class="entry-count-updated">
     Last updated: <span class="entry-count-time">—</span>
@@ -33,10 +33,14 @@
 <script>
 (function () {
   var COUNT_URL = 'https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count.json';
+  var SUBMISSION_LIMIT = 2000;
   var numberEl = document.querySelector('#entry-count-widget .entry-count-number');
+  var limitEl = document.querySelector('#entry-count-widget .entry-count-limit');
   var timeEl = document.querySelector('#entry-count-widget .entry-count-time');
 
-  if (!numberEl || !timeEl) return;
+  if (!numberEl || !limitEl || !timeEl) return;
+
+  limitEl.textContent = SUBMISSION_LIMIT.toLocaleString();
 
   function formatUpdatedAt(isoString) {
     var date = new Date(isoString);
