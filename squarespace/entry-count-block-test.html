@@ -1,8 +1,7 @@
 <!--
-  Paste this into a Squarespace Code Block on your TEST application page.
-
-  Count URL: https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count-test.json
+  Count URL: https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@latest/public/count-test.json
   Updated every 15 minutes by GitHub Actions (test workflow) — no API keys on this page.
+  Each update is tagged (semver) and jsDelivr @latest is purged after push.
 -->
 <div id="entry-count-widget-test">
   <p class="entry-count-line" aria-live="polite">
@@ -32,7 +31,7 @@
 
 <script>
 (function () {
-  var COUNT_URL = 'https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count-test.json';
+  var COUNT_URL = 'https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@latest/public/count-test.json';
   var SUBMISSION_LIMIT = 2000;
   var root = document.querySelector('#entry-count-widget-test');
   if (!root) return;
