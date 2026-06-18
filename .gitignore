@@ -13,6 +13,7 @@ npm-debug.log*
 
 # Local API reference and scripts with credentials
 api/swagger_06-15-2026.json
+api/count-submissions.js
 api/list-projects.js
 api/list-submissions.js
 api/delete-submission.js
