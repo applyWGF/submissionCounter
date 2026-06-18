@@ -1,24 +1,33 @@
-// Fetches the submission count from Submittable and writes public/count.json.
+// Fetches the submission count from Submittable and writes a public JSON file.
 //
-// Local run:
+// Local run (live):
 //   node --env-file=.env.local scripts/update-count.js
+//
+// Local run (test):
+//   OUTPUT_PATH=public/count-test.json SUBMITTABLE_PROJECT_ID=<test-id> \
+//     node --env-file=.env.local scripts/update-count.js
 //
 // Required env vars:
 //   SUBMITTABLE_API_KEY
 //   SUBMITTABLE_PROJECT_ID
+//
+// Optional env vars:
+//   OUTPUT_PATH — defaults to public/count.json
 
 const fs = require('fs/promises');
 const path = require('path');
 const { countSubmissionsForProject } = require('../lib/submittable');
 
-const OUTPUT_PATH = path.join(__dirname, '../public/count.json');
+const OUTPUT_PATH = process.env.OUTPUT_PATH
+  ? path.resolve(process.cwd(), process.env.OUTPUT_PATH)
+  : path.join(__dirname, '../public/count.json');
 
 async function main() {
   const apiKey = process.env.SUBMITTABLE_API_KEY;
   const projectId = process.env.SUBMITTABLE_PROJECT_ID;
 
   if (!apiKey || !projectId) {
-    console.error('Set SUBMITTABLE_API_KEY and SUBMITTABLE_PROJECT_ID in .env.local');
+    console.error('Set SUBMITTABLE_API_KEY and SUBMITTABLE_PROJECT_ID');
     process.exit(1);
   }
 

@@ -1,0 +1,77 @@
+<!--
+  Paste this into a Squarespace Code Block on your TEST application page.
+
+  Count URL: https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count-test.json
+  Updated every 15 minutes by GitHub Actions (test workflow) — no API keys on this page.
+-->
+<div id="entry-count-widget-test">
+  <p class="entry-count-line" aria-live="polite">
+    Submissions Received: <span class="entry-count-number">—</span> / <span class="entry-count-limit">2000</span>
+  </p>
+  <p class="entry-count-updated">
+    Last updated: <span class="entry-count-time">—</span>
+  </p>
+</div>
+
+<style>
+  #entry-count-widget-test {
+    text-align: center;
+    padding: 1.5rem;
+  }
+  #entry-count-widget-test .entry-count-line {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+  }
+  #entry-count-widget-test .entry-count-updated {
+    font-size: 0.95rem;
+    margin: 0;
+    opacity: 0.85;
+  }
+</style>
+
+<script>
+(function () {
+  var COUNT_URL = 'https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@main/public/count-test.json';
+  var SUBMISSION_LIMIT = 2000;
+  var root = document.querySelector('#entry-count-widget-test');
+  if (!root) return;
+
+  var numberEl = root.querySelector('.entry-count-number');
+  var limitEl = root.querySelector('.entry-count-limit');
+  var timeEl = root.querySelector('.entry-count-time');
+
+  if (!numberEl || !limitEl || !timeEl) return;
+
+  limitEl.textContent = SUBMISSION_LIMIT.toLocaleString();
+
+  function formatUpdatedAt(isoString) {
+    var date = new Date(isoString);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+  }
+
+  fetch(COUNT_URL)
+    .then(function (res) {
+      if (!res.ok) throw new Error('Request failed');
+      return res.json();
+    })
+    .then(function (data) {
+      if (typeof data.count !== 'number') throw new Error('Invalid response');
+      numberEl.textContent = data.count.toLocaleString();
+      timeEl.textContent = data.updatedAt ? formatUpdatedAt(data.updatedAt) : '—';
+    })
+    .catch(function () {
+      numberEl.textContent = '—';
+      timeEl.textContent = '—';
+    });
+})();
+</script>

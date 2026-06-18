@@ -1,0 +1,53 @@
+name: Update submission count (test)
+
+on:
+  schedule:
+    # Every 15 minutes, offset from live workflow to reduce push conflicts
+    - cron: '8,23,38,53 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  update-count-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Fetch test project count from Submittable
+        env:
+          SUBMITTABLE_API_KEY: ${{ secrets.SUBMITTABLE_API_KEY }}
+          SUBMITTABLE_PROJECT_ID: ${{ secrets.SUBMITTABLE_PROJECT_ID_TEST }}
+          OUTPUT_PATH: public/count-test.json
+        run: node scripts/update-count.js
+
+      - name: Commit and push count-test.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/count-test.json
+          if git diff --staged --quiet; then
+            echo "No change to count-test.json"
+            exit 0
+          fi
+          git commit -m "chore: update test submission count"
+          git pull --rebase origin main
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
+
+      - name: Purge jsDelivr cache
+        continue-on-error: true
+        run: |
+          curl -sS -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/public/count-test.json" \
+            || echo "jsDelivr purge unavailable — count-test.json was still updated in the repo"
