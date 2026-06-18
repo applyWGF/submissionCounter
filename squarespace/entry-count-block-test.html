@@ -58,7 +58,7 @@
     });
   }
 
-  fetch(COUNT_URL)
+  fetch(COUNT_URL + '?t=' + Date.now(), { cache: 'no-store' })
     .then(function (res) {
       if (!res.ok) throw new Error('Request failed');
       return res.json();
