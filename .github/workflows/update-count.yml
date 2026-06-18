@@ -2,8 +2,8 @@ name: Update submission count
 
 on:
   schedule:
-    # Every 15 minutes
-    - cron: '*/15 * * * *'
+    # Every 15 minutes, off peak minutes to reduce GitHub schedule skips
+    - cron: '3,18,33,48 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,7 @@ jobs:
         run: node scripts/update-count.js
 
       - name: Commit and push count.json
+        id: publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -38,15 +39,29 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/count.json
           if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No change to count.json"
             exit 0
           fi
           git commit -m "chore: update submission count"
           git pull --rebase origin main
           git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Tag release for jsDelivr
+        if: steps.publish.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="1.0.${GITHUB_RUN_ID}"
+          git tag "$TAG"
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" "$TAG"
+          echo "Tagged $TAG for jsDelivr @latest"
 
       - name: Purge jsDelivr cache
+        if: steps.publish.outputs.changed == 'true'
         continue-on-error: true
         run: |
-          curl -sS -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/public/count.json" \
-            || echo "jsDelivr purge unavailable — count.json was still updated in the repo"
+          # Brief pause so jsDelivr picks up the new tag before purge
+          sleep 10
+          curl -sS "https://purge.jsdelivr.net/gh/${{ github.repository }}@latest/public/count.json"
