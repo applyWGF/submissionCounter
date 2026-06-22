@@ -1,7 +1,6 @@
 <!--
-  Count URL: https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@latest/public/count.json
+  Count URL: https://raw.githubusercontent.com/applyWGF/submissionCounter/main/public/count.json
   Updated every 15 minutes by GitHub Actions — no API keys on this page.
-  Each update is tagged (semver) and jsDelivr @latest is purged after push.
 -->
 <div id="entry-count-widget">
   <p class="entry-count-line" aria-live="polite">
@@ -31,7 +30,7 @@
 
 <script>
 (function () {
-  var COUNT_URL = 'https://cdn.jsdelivr.net/gh/applyWGF/submissionCounter@latest/public/count.json';
+  var COUNT_URL = 'https://raw.githubusercontent.com/applyWGF/submissionCounter/main/public/count.json';
   var SUBMISSION_LIMIT = 2000;
   var root = document.querySelector('#entry-count-widget');
   if (!root) return;
